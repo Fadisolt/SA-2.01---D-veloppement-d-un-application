@@ -63,7 +63,6 @@ export class Game {
     this.#deck = this.#prepareDeck(configGame.collection, nbGroupsNeeded, configGame.homonymes);
   }
 
-
   // Todo À compléter
 
 }
