@@ -18,12 +18,12 @@
     <label for="playerName">Nom d'utilisateur</label>
     <input type="text" id="playerName" name="playerName" required placeholder="Entrez votre pseudo">
 
-    <label for="difficulty">Niveau de difficulté (Paires)</label>
+    <label for="difficulty">Niveau de difficulté</label>
     <select id="difficulty" name="difficulty">
-      <option value="4">4 paires</option>
-      <option value="5">5 paires</option>
-      <option value="6">6 paires</option>
-      <option value="8">8 paires</option>
+      <option value="8">Facile</option>
+      <option value="10">Moyen</option>
+      <option value="12">Difficile</option>
+      <option value="16">Expert</option>
     </select>
 
     <label for="collection">Collection d'images</label>
@@ -31,6 +31,23 @@
       <option value="animals">Animaux</option>
       <option value="fruits">Fruits</option>
       <option value="cars">Voitures</option>
+    </select>
+
+    <label for="homonymes">nombres d'Homonymes</label>
+    <select id="homonymes" name="homonymes">
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="8">8</option>
+    </select>
+
+    <label for="mode">Mode de Jeu</label>
+    <select id="mode" name="mode">
+      <option value="classic">Classique</option>
+      <option value="survie">Survie</option>
+      <option value="speedrun">Speedrun</option>
     </select>
 
     <button type="submit">Jouer !</button>

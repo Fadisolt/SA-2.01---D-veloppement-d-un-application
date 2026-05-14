@@ -9,6 +9,11 @@ export class Game {
    */
   #id;
   #deck = [];
+  #mode;
+  #vies = 0;
+  #timerValue = 0;
+  #timerInterval;
+
   #prepareDeck(collectionName, nbGroups, nbHomonymes = 2) {
 
     const source = [...imageCollections[collectionName]];
@@ -55,12 +60,18 @@ export class Game {
   /**
    * Start a new game.
    * @param {number} id - The game ID.
+   * @param configGame
    */
   startGame(id, configGame) {
     this.#id = id;
+    this.#mode = configGame.mode;
     const nbGroupsNeeded = configGame.total / configGame.homonymes;
 
     this.#deck = this.#prepareDeck(configGame.collection, nbGroupsNeeded, configGame.homonymes);
+
+    console.log("Le paquet est prêt :", this.#deck);
+
+
   }
 
   // Todo À compléter
