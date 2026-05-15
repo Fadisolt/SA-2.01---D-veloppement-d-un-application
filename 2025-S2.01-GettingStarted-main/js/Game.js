@@ -9,6 +9,11 @@ export class Game {
    */
   #id;
   #deck = [];
+  #mode;
+  #vies = 0;
+  #timerValue = 0;
+  #timerInterval;
+
   #prepareDeck(collectionName, nbGroups, nbHomonymes = 2) {
 
     const source = [...imageCollections[collectionName]];
@@ -55,14 +60,32 @@ export class Game {
   /**
    * Start a new game.
    * @param {number} id - The game ID.
+   * @param configGame
    */
   startGame(id, configGame) {
+
     this.#id = id;
+    this.#mode = configGame.mode;
+
+    document.querySelector('.setup-form').classList.add('hidden');
+    document.querySelector('.game-area').classList.remove('hidden');
+
     const nbGroupsNeeded = configGame.total / configGame.homonymes;
-
     this.#deck = this.#prepareDeck(configGame.collection, nbGroupsNeeded, configGame.homonymes);
-  }
 
-  // Todo À compléter
+    console.log("Le paquet est prêt :", this.#deck);
+
+    if (this.#mode === 'survie') {
+      this.#vies = 10;
+      console.log("Mode survie : 10 erreurs max");
+    }
+    else if (this.#mode === 'speedrun') {
+      this.#timerValue = 60;
+      console.log("Mode speedrun");
+    }
+
+    this.#displayCards(); //A Completer
+
+  }
 
 }

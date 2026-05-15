@@ -1,3 +1,5 @@
+
+
 import {MEMORY_URL} from './config.js';
 
 /**
@@ -17,7 +19,8 @@ export class ApiService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        // Todo compléter le body
+        name: pseudo,
+        difficulty: difficulty
       })
     });
 
