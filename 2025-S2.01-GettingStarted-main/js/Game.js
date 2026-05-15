@@ -40,21 +40,15 @@ export class Game {
   }
 
 
-  async endGame() {
-    // Todo À compléter
-
-
-    const idARemplacer = 1234;
-    const nombreDePairesRestanteARemplacer = 5678;
-
+  async endGame(pairsRemaining) {
     try {
-      const result = await ApiService.updateGameResult(idARemplacer, nombreDePairesRestanteARemplacer);
-      console.log('Fin de partie:', result);
+      const result = await ApiService.updateGameResult(this.#id, pairsRemaining);
+      console.log('Fin de partie enregistrée:', result);
+      alert(`Partie terminée ! Paires non trouvées : ${pairsRemaining}`);
     } catch (error) {
       console.error('Error:', error);
-      alert(error.message || 'Erreur lors de la fin de la partie');
+      alert(error.message || 'Erreur lors de l envoi du score de fin de partie');
     }
-
   }
 
   /**
