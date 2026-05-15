@@ -54,4 +54,12 @@ document.querySelector('.game-form').addEventListener('submit', async function (
   }
 });
 
+
+document.querySelector('#abandon').addEventListener('click', async function() {
+  if (confirm("Êtes-vous sûr de vouloir abandonner la partie ?")) {
+    document.querySelector('.game-area').classList.add('hidden');
+    document.querySelector('.setup-form').classList.remove('hidden');
+  }
+});
+
 updateHomonymesOptions();
