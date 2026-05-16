@@ -8,57 +8,61 @@
   <script src="js/app.js" type="module"></script>
 </head>
 <body>
-<header><h1>Jeu de Memory</h1></header>
+  <header><h1>Jeu de Memory</h1></header>
 
-<div class="setup-form">
-  <h2>Démarrer une nouvelle partie</h2>
+  <div class="setup-form">
+    <h2>Nouvelle partie</h2>
+    <form class="game-form">
+      <label for="playerName">Nom du joueur</label>
+      <input type="text" id="playerName" name="playerName" required placeholder="Entrez votre pseudo">
 
-  <form class="game-form">
+      <label for="difficulty">Total de cartes</label>
+      <select id="difficulty" name="difficulty">
+        <option value="8">8 cartes</option>
+        <option value="10">10 cartes</option>
+        <option value="12">12 cartes</option>
+        <option value="16">16 cartes</option>
+      </select>
 
-    <label for="playerName">Nom du joueur</label>
-    <input type="text" id="playerName" name="playerName" required placeholder="Entrez votre pseudo">
+      <label for="collection">Thème</label>
+      <select id="collection" name="collection">
+        <option value="animals">Animaux</option>
+        <option value="fruits">Fruits</option>
+        <option value="cars">Voitures</option>
+      </select>
 
-    <label for="difficulty">Niveau de difficulté</label>
-    <select id="difficulty" name="difficulty">
-      <option value="8">Facile (8 cartes)</option>
-      <option value="10">Moyen (10 cartes)</option>
-      <option value="12">Difficile (12 cartes)</option>
-      <option value="16">Expert (16 cartes)</option>
-    </select>
+      <label for="homonymes">Cartes identiques par groupe</label>
+      <select id="homonymes" name="homonymes">
+        <option value="2">2 (Paires)</option>
+        <option value="3">3 (Triplets)</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="8">8</option>
+      </select>
 
-    <label for="collection">Collection d'images</label>
-    <select id="collection" name="collection">
-      <option value="animals">Animaux</option>
-      <option value="fruits">Fruits</option>
-      <option value="cars">Voitures</option>
-    </select>
+      <label for="mode">Mode de Jeu</label>
+      <select id="mode" name="mode">
+        <option value="classic">Classique</option>
+        <option value="survie">Survie (Vies limitées)</option>
+        <option value="speedrun">Speedrun (Chrono)</option>
+      </select>
 
-    <label for="homonymes">nombres d'Homonymes</label>
-    <select id="homonymes" name="homonymes">
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-      <option value="8">8</option>
-    </select>
-
-    <label for="mode">Mode de Jeu</label>
-    <select id="mode" name="mode">
-      <option value="classic">Classique</option>
-      <option value="survie">Survie</option>
-      <option value="speedrun">Speedrun</option>
-    </select>
-
-    <button type="submit">Jouer</button>
-  </form>
-</div>
-
-<div class="game-area hidden">
-  <div class="game-area-header">
-    <button id="abandon">Abandonner</button>
+      <button type="submit">Jouer !</button>
+    </form>
   </div>
-  <div class="game-board"></div>
-</div>
+
+  <div class="game-area hidden">
+    <div class="game-area-header">
+      <div class="hud">
+        <span id="score-display">Paires : 0</span>
+        <span id="lives-display" class="hidden">❤️ Vies : 10</span>
+        <span id="timer-display" class="hidden">⏱️ Temps : 60s</span>
+      </div>
+      <button id="abandon">Abandonner</button>
+    </div>
+    
+    <div class="game-board"></div>
+  </div>
 </body>
 </html>

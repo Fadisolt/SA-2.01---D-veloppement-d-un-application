@@ -13,18 +13,18 @@ function updateHomonymesOptions() {
 
   options.forEach(option => {
     const val = parseInt(option.value);
-
-    if (total % val === 0 && val < total) {
+    
+    if (total % val === 0 && val <= total / 2) {
       option.style.display = "block";
       option.disabled = false;
-    }
-    else {
+    } else {
       option.style.display = "none";
       option.disabled = true;
     }
   });
+  
   const currentVal = parseInt(homonymesSelect.value);
-  if (total % currentVal !== 0 || currentVal >= total) {
+  if (total % currentVal !== 0 || currentVal > total / 2) {
     homonymesSelect.value = "2";
   }
 }
@@ -32,7 +32,7 @@ function updateHomonymesOptions() {
 difficultySelect.addEventListener('change', updateHomonymesOptions);
 
 document.querySelector('.game-form').addEventListener('submit', async function (event) {
-  event.preventDefault();
+  event.preventDefault(); 
 
   const configGame = {
     playerName: document.querySelector('#playerName').value,
@@ -43,22 +43,18 @@ document.querySelector('.game-form').addEventListener('submit', async function (
   };
 
   try {
-    const data = await ApiService.createGame(configGame.playerName,configGame.total);
-
-    console.log("ID reconnu :", data.id);
-    console.log('Success:', data);
-    game.startGame(data.id, configGame);
+    const data = await ApiService.createGame(configGame.playerName, configGame.total);
+    console.log("ID de la partie :", data.id);
+    game.startGame(data.id, configGame, domManager); 
   } catch (error) {
     console.error('Error:', error);
-    alert(error.message || 'Erreur lors de la création de la partie');
+    alert('Erreur lors de la création de la partie');
   }
 });
 
-
-document.querySelector('#abandon').addEventListener('click', async function() {
+document.querySelector('#abandon').addEventListener('click', function() {
   if (confirm("Êtes-vous sûr de vouloir abandonner la partie ?")) {
-    document.querySelector('.game-area').classList.add('hidden');
-    document.querySelector('.setup-form').classList.remove('hidden');
+    game.abandonGame();
   }
 });
 
