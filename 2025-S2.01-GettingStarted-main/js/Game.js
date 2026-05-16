@@ -1,12 +1,7 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
 
-
 export class Game {
-  /**
-   * @type {number} id identifiant de la partie en cours
-   * @type {} tableau de cartes
-   */
   #id;
   #deck = [];
   #mode;
@@ -14,72 +9,159 @@ export class Game {
   #timerValue = 0;
   #timerInterval;
 
+  #domManager;
+  #config;
+  #flippedCards = [];  
+  #matchedGroups = 0;  
+  #isLocked = false;   
+
   #prepareDeck(collectionName, nbGroups, nbHomonymes = 2) {
-
     const source = [...imageCollections[collectionName]];
-    const selected = source
-        .sort(() => Math.random() - 0.5)
-        .slice(0, nbGroups);
-
+    const selected = source.sort(() => Math.random() - 0.5).slice(0, nbGroups);
     let tempDeck = [];
     selected.forEach(img => {
-      for (let i = 0; i < nbHomonymes; i++) {
-        tempDeck.push({
-          ...img,
-          instanceId: `${img.id}-${i}`
-        });
-      }
+      for (let i = 0; i < nbHomonymes; i++) tempDeck.push({ ...img, instanceId: `${img.id}-${i}` });
     });
-
     for (let i = tempDeck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [tempDeck[i], tempDeck[j]] = [tempDeck[j], tempDeck[i]];
     }
-
     return tempDeck;
   }
 
-
-  async endGame(pairsRemaining) {
-    try {
-      const result = await ApiService.updateGameResult(this.#id, pairsRemaining);
-      console.log('Fin de partie enregistrée:', result);
-      alert(`Partie terminée ! Paires non trouvées : ${pairsRemaining}`);
-    } catch (error) {
-      console.error('Error:', error);
-      alert(error.message || 'Erreur lors de l envoi du score de fin de partie');
-    }
-  }
-
-  /**
-   * Start a new game.
-   * @param {number} id - The game ID.
-   * @param configGame
-   */
-  startGame(id, configGame) {
-
+  startGame(id, configGame, domManager) {
     this.#id = id;
     this.#mode = configGame.mode;
+    this.#config = configGame;
+    this.#domManager = domManager;
+
+    this.#flippedCards = [];
+    this.#matchedGroups = 0;
+    this.#isLocked = false;
+    
+    if (this.#timerInterval) clearInterval(this.#timerInterval);
 
     document.querySelector('.setup-form').classList.add('hidden');
     document.querySelector('.game-area').classList.remove('hidden');
-
-    const nbGroupsNeeded = configGame.total / configGame.homonymes;
-    this.#deck = this.#prepareDeck(configGame.collection, nbGroupsNeeded, configGame.homonymes);
-
-    console.log("Le paquet est prêt :", this.#deck);
+    document.querySelector('#score-display').innerText = `Paires trouvées : 0 / ${configGame.total / configGame.homonymes}`;
+    document.querySelector('#lives-display').classList.add('hidden');
+    document.querySelector('#timer-display').classList.add('hidden');
 
     if (this.#mode === 'survie') {
       this.#vies = 10;
-      console.log("Mode survie : 10 erreurs max");
-    }
-    else if (this.#mode === 'speedrun') {
+      document.querySelector('#lives-display').classList.remove('hidden');
+      document.querySelector('#lives-display').innerText = `❤️ Vies : ${this.#vies}`;
+    } else if (this.#mode === 'speedrun') {
       this.#timerValue = 60;
-      console.log("Mode speedrun");
+      document.querySelector('#timer-display').classList.remove('hidden');
+      document.querySelector('#timer-display').innerText = `⏱️ Temps : ${this.#timerValue}s`;
+      this.#startTimer();
     }
 
-    this.#displayCards(); //A Completer
-
+    const nbGroupsNeeded = configGame.total / configGame.homonymes;
+    this.#deck = this.#prepareDeck(configGame.collection, nbGroupsNeeded, configGame.homonymes);
+    this.#displayCards();
   }
 
+  #displayCards() {
+    this.#domManager.createCards(this.#deck, this);
+
+    if (this.#mode === 'survie') {
+      this.#isLocked = true;
+      document.querySelectorAll('.card').forEach(card => card.classList.add('flip'));
+      
+      setTimeout(() => {
+        document.querySelectorAll('.card:not(.matched)').forEach(card => card.classList.remove('flip'));
+        this.#isLocked = false;
+      }, 20000); 
+    }
+  }
+
+  handleCardClick(cardElement, cardData) {
+    if (this.#isLocked || cardElement.classList.contains('matched') || this.#flippedCards.includes(cardElement)) return;
+
+    cardElement.classList.add('flip');
+    
+    this.#flippedCards.push(cardElement);
+
+    if (this.#flippedCards.length === this.#config.homonymes) this.#checkMatch();
+  }
+
+  #checkMatch() {
+    this.#isLocked = true;
+    const firstId = this.#flippedCards[0].dataset.id;
+    const isMatch = this.#flippedCards.every(card => card.dataset.id === firstId);
+
+    if (isMatch) {
+      this.#flippedCards.forEach(card => card.classList.add('matched'));
+      this.#matchedGroups++;
+      document.querySelector('#score-display').innerText = `Paires trouvées : ${this.#matchedGroups} / ${this.#config.total / this.#config.homonymes}`;
+      this.#flippedCards = [];
+      this.#isLocked = false;
+
+      if (this.#matchedGroups === (this.#config.total / this.#config.homonymes)) this.#handleVictory();
+    } else {
+      this.#handleMistake();
+      setTimeout(() => {
+        this.#flippedCards.forEach(card => card.classList.remove('flip'));
+        this.#flippedCards = [];
+        this.#isLocked = false;
+      }, 1000);
+    }
+  }
+
+  #handleMistake() {
+    if (this.#mode === 'survie') {
+      this.#vies--;
+      document.querySelector('#lives-display').innerText = `❤️ Vies : ${this.#vies}`;
+      if (this.#vies <= 0) this.abandonGame();
+    }
+  }
+
+  #startTimer() {
+    const timerDisplay = document.querySelector('#timer-display');
+    this.#timerInterval = setInterval(() => {
+      this.#timerValue--;
+      timerDisplay.innerText = `⏱️ Temps : ${this.#timerValue}s`;
+      if (this.#timerValue <= 0) {
+        clearInterval(this.#timerInterval);
+        this.abandonGame();
+      }
+    }, 1000);
+  }
+
+  #handleVictory() {
+    if (this.#mode === 'speedrun') {
+      this.#timerValue += 15;
+      this.#matchedGroups = 0;
+      this.#flippedCards = [];
+      const nbGroupsNeeded = this.#config.total / this.#config.homonymes;
+      this.#deck = this.#prepareDeck(this.#config.collection, nbGroupsNeeded, this.#config.homonymes);
+      this.#displayCards();
+    } else {
+      clearInterval(this.#timerInterval);
+      this.endGame(0);
+    }
+  }
+
+  abandonGame() {
+    clearInterval(this.#timerInterval);
+    const remainingCards = this.#config.total - (this.#matchedGroups * this.#config.homonymes);
+    this.endGame(remainingCards);
+  }
+
+  async endGame(pairsRemaining) {
+    if (this.#timerInterval) clearInterval(this.#timerInterval);
+    
+    try {
+      await ApiService.updateGameResult(this.#id, pairsRemaining);
+      alert(`Partie terminée ! Cartes non trouvées : ${pairsRemaining}`);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Partie terminée (Score non enregistré suite à une erreur réseau)');
+    } finally {
+      document.querySelector('.game-area').classList.add('hidden');
+      document.querySelector('.setup-form').classList.remove('hidden');
+    }
+  }
 }
